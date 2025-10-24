@@ -6,7 +6,7 @@ export enum ArticleType {
 }
 
 export interface Article {
-  id: number;
+  id: string | number;
   type: ArticleType;
   title: string;
   slug: string;
@@ -21,7 +21,7 @@ export interface Article {
 }
 
 export interface Event {
-  id: number;
+  id: string | number;
   title: string;
   slug: string;
   date: string;
@@ -37,7 +37,7 @@ export interface Event {
 }
 
 export interface Sponsor {
-  id: number;
+  id: string | number;
   name: string;
   logo_url: string;
   url: string;

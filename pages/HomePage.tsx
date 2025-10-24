@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import type { Sponsor } from '../types';
+import type { Sponsor, Article, Event } from '../types';
 import { useData } from '../hooks/useData';
 import Button from '../components/common/Button';
 import ArticleCard from '../components/common/ArticleCard';
+import { fetchArticlesByType, fetchUpcomingEvents, fetchSponsors } from '../services/firestore';
+import { ArticleType } from '../types';
 
 
 // Icons for the new feature cards
@@ -56,11 +58,26 @@ const SectionTitle: React.FC<{ title: string; subtitle: string }> = ({ title, su
 );
 
 const HomePage: React.FC = () => {
-    const { news, blog, events, sponsors } = useData();
+    const [latestNews, setLatestNews] = useState<Article[]>([]);
+    const [latestBlog, setLatestBlog] = useState<Article[]>([]);
+    const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+    const [sponsors, setSponsors] = useState<Sponsor[]>([]);
 
-    const latestNews = [...news].sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime()).slice(0, 3);
-    const latestBlog = [...blog].sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime()).slice(0, 3);
-    const upcomingEvents = [...events].filter(e => !e.is_past).slice(0, 2);
+    useEffect(() => {
+        const loadHomePageData = async () => {
+            const [newsData, blogData, eventsData, sponsorsData] = await Promise.all([
+                fetchArticlesByType(ArticleType.News, 3),
+                fetchArticlesByType(ArticleType.Blog, 3),
+                fetchUpcomingEvents(3),
+                fetchSponsors()
+            ]);
+            setLatestNews(newsData);
+            setLatestBlog(blogData);
+            setUpcomingEvents(eventsData);
+            setSponsors(sponsorsData);
+        };
+        loadHomePageData();
+    }, []);
 
     return (
         <div>

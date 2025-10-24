@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Event } from '../types';
-import { useData } from '../hooks/useData';
 import PageTitle from '../components/common/PageTitle';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
 import { Link } from 'react-router-dom';
+import { fetchEvents, updateEventAttendees } from '../services/firestore';
 
 const EventCard: React.FC<{ event: Event; onReserve: (event: Event) => void }> = ({ event, onReserve }) => (
     <div className="bg-white p-6 rounded-lg shadow-md flex flex-col md:flex-row items-center justify-between gap-6 border-l-4 border-brand-gold">
@@ -34,11 +34,12 @@ const EventCard: React.FC<{ event: Event; onReserve: (event: Event) => void }> =
 );
 
 const EventsPage: React.FC = () => {
-    const { events, loading, addEventAttendee } = useData();
+    const [events, setEvents] = useState<Event[]>([]);
+    const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
     const [isSubmitted, setIsSubmitted] = useState(false);
-    
+
     // Form state
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -46,6 +47,16 @@ const EventsPage: React.FC = () => {
     const [phone, setPhone] = useState('');
     const [companyName, setCompanyName] = useState('');
     const [contactMethod, setContactMethod] = useState('email');
+
+    useEffect(() => {
+        const loadEvents = async () => {
+            setLoading(true);
+            const eventsData = await fetchEvents(3);
+            setEvents(eventsData);
+            setLoading(false);
+        };
+        loadEvents();
+    }, []);
 
     const handleReserveClick = (event: Event) => {
         setSelectedEvent(event);
@@ -60,9 +71,8 @@ const EventsPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleFormSubmit = (e: React.FormEvent) => {
+    const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Here you would typically send the data to a server
         console.log({
             eventId: selectedEvent?.id,
             firstName,
@@ -74,7 +84,9 @@ const EventsPage: React.FC = () => {
         });
         setIsSubmitted(true);
         if (selectedEvent) {
-            addEventAttendee(selectedEvent.id);
+            await updateEventAttendees(selectedEvent.id, selectedEvent.attendees + 1);
+            const updatedEvents = await fetchEvents(3);
+            setEvents(updatedEvents);
         }
     };
 
