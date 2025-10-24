@@ -1,14 +1,15 @@
 import React, { createContext, useState, useEffect } from 'react';
 import type { User, Article, Event, Sponsor, LogEntry } from '../types';
-import { 
-    users as seedUsers, 
-    news as seedNews, 
-    blog as seedBlog, 
-    events as seedEvents, 
-    sponsors as seedSponsors 
+import {
+    users as seedUsers,
+    news as seedNews,
+    blog as seedBlog,
+    events as seedEvents,
+    sponsors as seedSponsors
 } from '../data/seed';
 import { ArticleType } from '../types';
 import { useAuth } from '../hooks/useAuth';
+import { fetchArticles, fetchEvents, fetchSponsors } from '../services/firestore';
 
 interface DataContextType {
   loading: boolean;
@@ -59,8 +60,30 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [activityLog, setActivityLog] = useState<LogEntry[]>([]);
 
   useEffect(() => {
-    // Simulate initial data load
-    setLoading(false);
+    const loadFirestoreData = async () => {
+      setLoading(true);
+      try {
+        const [articlesData, eventsData, sponsorsData] = await Promise.all([
+          fetchArticles(),
+          fetchEvents(),
+          fetchSponsors()
+        ]);
+
+        const newsArticles = articlesData.filter(a => a.type === ArticleType.News);
+        const blogArticles = articlesData.filter(a => a.type === ArticleType.Blog);
+
+        if (newsArticles.length > 0) setNews(newsArticles);
+        if (blogArticles.length > 0) setBlog(blogArticles);
+        if (eventsData.length > 0) setEvents(eventsData);
+        if (sponsorsData.length > 0) setSponsors(sponsorsData);
+      } catch (error) {
+        console.error('Error loading Firestore data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadFirestoreData();
   }, []);
 
   const addLogEntry = (action: string, details: string) => {
