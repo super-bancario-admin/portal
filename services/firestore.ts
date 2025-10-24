@@ -1,6 +1,6 @@
-import { collection, getDocs, query, orderBy, DocumentData } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, where, DocumentData } from "firebase/firestore";
 import { db } from "./firebase";
-import type { Article, Event, Sponsor } from "../types";
+import type { Article, Event, Sponsor, User, Role, Permissions } from "../types";
 import { ArticleType } from "../types";
 
 const mapFirestoreArticle = (doc: DocumentData, type: ArticleType): Article => {
@@ -102,5 +102,55 @@ export const fetchSponsors = async (): Promise<Sponsor[]> => {
   } catch (error) {
     console.error("Error fetching sponsors:", error);
     return [];
+  }
+};
+
+const mapFirestoreUser = (doc: DocumentData): User => {
+  const data = doc.data();
+
+  const defaultPermissions: Permissions = {
+    manageAdmins: false,
+    manageManagers: false,
+    manageBloggers: false,
+    fullNewsCRUD: false,
+    fullBlogCRUD: false,
+    viewAllAnalytics: false,
+    viewLimitedAnalytics: false,
+    createContent: false,
+    crudOwnContent: false,
+  };
+
+  return {
+    id: parseInt(doc.id) || Date.now(),
+    username: data.username || data.email || "",
+    email: data.email || "",
+    passwordHash: data.password || data.passwordHash || "",
+    role: data.role as Role || 'Blogger',
+    permissions: data.permissions || defaultPermissions,
+  };
+};
+
+export const authenticateUserFromFirestore = async (identifier: string, password: string): Promise<User | null> => {
+  try {
+    const usersRef = collection(db, "users");
+    const querySnapshot = await getDocs(usersRef);
+
+    let authenticatedUser: User | null = null;
+
+    querySnapshot.forEach((doc) => {
+      const user = mapFirestoreUser(doc);
+      const emailMatch = user.email && user.email.toLowerCase() === identifier.toLowerCase();
+      const usernameMatch = user.username.toLowerCase() === identifier.toLowerCase();
+      const passwordMatch = user.passwordHash === password;
+
+      if ((emailMatch || usernameMatch) && passwordMatch) {
+        authenticatedUser = user;
+      }
+    });
+
+    return authenticatedUser;
+  } catch (error) {
+    console.error("Error authenticating user from Firestore:", error);
+    return null;
   }
 };
