@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ser Bancário | Portal Financeiro de Angola</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'brand-gold': '#D4AF37',
+              'brand-teal-deep': '#1B5956',
+              'brand-gold-light': '#F4E4B8',
+              'brand-teal-dark': '#0F3D3A',
+              'brand-grey-warm': '#F5F5F3',
+              'brand-success': '#2D7A5A',
+              'brand-alert': '#C4463A',
+              'brand-info': '#4A90A4',
+              'brand-grey-dark': '#2C2C2C',
+              'brand-grey-medium': '#757575',
+              'brand-grey-light': '#E8E8E8',
+            },
+            fontFamily: {
+              'sans': ['Poppins', 'sans-serif'],
+              'serif': ['Playfair Display', 'serif'],
+            }
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.3"
+  }
+}
+</script>
+<style>
+  @keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .animate-scroll {
+    animation: scroll 40s linear infinite;
+    will-change: transform;
+  }
+  .group:hover .animate-scroll {
+    animation-play-state: paused;
+  }
+</style>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
